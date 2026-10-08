@@ -1,0 +1,113 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "This location is already configured",
+      "reauth_successful": "The API key was updated"
+    },
+    "error": {
+      "cannot_connect": "Failed to connect: {error}",
+      "invalid_api_key": "Invalid API key, or the key has no One Call API 4.0 subscription yet (new subscriptions can take a while to activate)",
+      "rate_limited": "Your OpenWeatherMap daily call limit has been reached; try again later"
+    },
+    "step": {
+      "user": {
+        "title": "OpenWeatherMap One Call 4.0",
+        "description": "Needs an OpenWeatherMap API key with a \"One Call API 4.0\" subscription (the first 1,000 calls a day are free; this integration uses about 600). Set the daily limit on your OpenWeatherMap billing page to 1,000 so you are never charged.",
+        "data": {
+          "name": "Name",
+          "location": "Location",
+          "api_key": "API key",
+          "language": "Language"
+        },
+        "data_description": {
+          "name": "Name for this location (used for the device and entity names)",
+          "location": "Location to get the weather for",
+          "api_key": "Your OpenWeatherMap API key",
+          "language": "Language for the weather descriptions"
+        }
+      },
+      "reauth_confirm": {
+        "title": "OpenWeatherMap API key",
+        "description": "OpenWeatherMap rejected the API key. Enter a working key with a One Call API 4.0 subscription.",
+        "data": {
+          "api_key": "API key"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "language": "Language"
+        },
+        "data_description": {
+          "language": "Language for the weather descriptions"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "precipitation_next_hour": {
+        "name": "Precipitation next hour"
+      }
+    },
+    "sensor": {
+      "weather": {
+        "name": "Weather"
+      },
+      "dew_point": {
+        "name": "Dew point"
+      },
+      "feels_like_temperature": {
+        "name": "Apparent temperature"
+      },
+      "wind_gust": {
+        "name": "Wind gust speed"
+      },
+      "clouds": {
+        "name": "Cloud coverage"
+      },
+      "rain": {
+        "name": "Rain intensity"
+      },
+      "snow": {
+        "name": "Snow intensity"
+      },
+      "precipitation_kind": {
+        "name": "Precipitation kind"
+      },
+      "uv_index": {
+        "name": "UV index"
+      },
+      "visibility_distance": {
+        "name": "Visibility"
+      },
+      "condition": {
+        "name": "Condition"
+      },
+      "weather_code": {
+        "name": "Weather code"
+      },
+      "precipitation_probability": {
+        "name": "Precipitation probability"
+      },
+      "minutes_until_precipitation": {
+        "name": "Minutes until precipitation"
+      },
+      "next_hour_max_precipitation": {
+        "name": "Next hour max precipitation intensity"
+      },
+      "next_hour_precipitation": {
+        "name": "Next hour precipitation"
+      }
+    }
+  },
+  "services": {
+    "get_minute_forecast": {
+      "name": "Get minute forecast",
+      "description": "Returns the minute-by-minute precipitation forecast (mm/h) for the next hour."
+    }
+  }
+}

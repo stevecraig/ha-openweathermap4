@@ -1,0 +1,12 @@
+{
+  "domain": "openweathermap4",
+  "name": "OpenWeatherMap 4.0",
+  "codeowners": ["@stevecraig"],
+  "config_flow": true,
+  "documentation": "https://github.com/stevecraig/ha-openweathermap4",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/stevecraig/ha-openweathermap4/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

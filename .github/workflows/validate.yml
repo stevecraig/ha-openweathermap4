@@ -1,0 +1,25 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  hassfest:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: home-assistant/actions/hassfest@master
+
+  hacs:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: hacs/action@main
+        with:
+          category: integration
+          # Installed as a HACS custom repository, not listed in the HACS store,
+          # so the store-only checks (brand images, repo description and
+          # topics) don't apply.
+          ignore: brands description topics
