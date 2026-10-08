@@ -34,7 +34,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import OWM4ConfigEntry
 from .const import ATTRIBUTION
 from .coordinator import HourlyCoordinator, MinuteCoordinator, OWM4Coordinator
-from .entity import device_info
+from .entity import RainOutlookMixin, device_info
 
 # Same sensors as the core OpenWeatherMap integration (current conditions).
 CURRENT_SENSORS: tuple[SensorEntityDescription, ...] = (
@@ -183,6 +183,19 @@ HOURLY_POP = SensorEntityDescription(
     state_class=SensorStateClass.MEASUREMENT,
 )
 
+NEXT_RAIN = SensorEntityDescription(
+    key="next_rain",
+    translation_key="next_rain",
+    device_class=SensorDeviceClass.TIMESTAMP,
+)
+DRY_HOURS_TODAY = SensorEntityDescription(
+    key="dry_hours_today",
+    translation_key="dry_hours_today",
+    native_unit_of_measurement=UnitOfTime.HOURS,
+    device_class=SensorDeviceClass.DURATION,
+    suggested_display_precision=1,
+)
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -196,6 +209,9 @@ async def async_setup_entry(
     ]
     entities.append(PrecipitationProbabilitySensor(entry, data.hourly, HOURLY_POP))
     entities.extend(MinuteSensor(entry, data.minute, d) for d in MINUTE_SENSORS)
+    entities.extend(
+        RainOutlookSensor(entry, data.hourly, d) for d in (NEXT_RAIN, DRY_HOURS_TODAY)
+    )
     async_add_entities(entities)
 
 
@@ -264,3 +280,29 @@ class MinuteSensor(OWM4Sensor[MinuteCoordinator]):
         if self.entity_description.attributes is None:
             return None
         return self.entity_description.attributes(self.coordinator.summary())
+
+
+class RainOutlookSensor(RainOutlookMixin, OWM4Sensor[HourlyCoordinator]):
+    """Next rain (time) or dry hours left today, from hourly + minute data."""
+
+    @property
+    def native_value(self) -> StateType | datetime:
+        """The outlook value for this sensor."""
+        outlook = self.outlook()
+        if outlook is None:
+            return None
+        if self.entity_description.key == "next_rain":
+            return outlook["next_rain"]
+        return outlook["dry_hours_today"]
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """For next rain: where the time came from and how wet that hour is."""
+        outlook = self.outlook()
+        if outlook is None or self.entity_description.key != "next_rain":
+            return None
+        return {
+            "source": outlook["source"],
+            "probability": outlook["probability"],
+            "precipitation": outlook["precipitation"],
+        }

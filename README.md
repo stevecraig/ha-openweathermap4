@@ -21,6 +21,15 @@ One device per location, with:
     Its attributes are `starts_at`, `ends_at`, `minutes_until` and `max_rate`.
   - `sensor.<name>_minutes_until_precipitation` counts down every minute. It is unknown when the hour is dry.
   - `sensor.<name>_next_hour_max_precipitation_intensity` (mm/h) and `sensor.<name>_next_hour_precipitation` (mm).
+- **When the rain starts**, from the hourly forecast, sharpened to the minute by the minute forecast within the next
+  hour:
+  - `sensor.<name>_next_rain`: the time the next rain starts, within the 48-hour forecast (unknown if none). Its
+    attributes say whether the time came from the `minute` or `hourly` forecast, plus that hour's chance and amount.
+  - `sensor.<name>_dry_hours_left_today`: hours from now until the rain or midnight, whichever comes first.
+  - `binary_sensor.<name>_rain_later_today`: on when rain starts before midnight.
+
+  An hour counts as wet when its chance of rain is at least 40 % or at least 0.2 mm is forecast. You can change both
+  from the integration's **Configure** button.
 - **Action `openweathermap4.get_minute_forecast`**, which returns the minute forecast in the same shape as the
   built-in `openweathermap.get_minute_forecast`. It is answered from the last poll, so calling it uses no API calls.
 
@@ -49,7 +58,7 @@ charged. With two locations you would go over the free 1,000.
    (your home by default) and your API key. The key is stored by Home Assistant like any other integration's.
 
 If OpenWeatherMap later rejects the key, Home Assistant shows a **Reconfigure** prompt asking for a new one. You can
-change the language later from the integration's **Configure** button.
+change the language and the rain thresholds later from the integration's **Configure** button.
 
 ## Examples
 
@@ -66,6 +75,23 @@ actions:
       message: >
         Rain in about {{ states('sensor.home_minutes_until_precipitation') }} minutes
         (up to {{ state_attr('binary_sensor.home_precipitation_next_hour', 'max_rate') }} mm/h).
+```
+
+Is there time to dry the washing outside?
+
+```yaml
+triggers:
+  - trigger: time
+    at: "08:00:00"
+conditions:
+  - condition: numeric_state
+    entity_id: sensor.home_dry_hours_left_today
+    above: 5
+actions:
+  - action: notify.mobile_app_phone
+    data:
+      message: >
+        Good drying day: dry for {{ states('sensor.home_dry_hours_left_today') }} hours.
 ```
 
 Read the minute forecast in a template or script:

@@ -26,13 +26,25 @@ from homeassistant.helpers.selector import (
     LanguageSelectorConfig,
     LocationSelector,
     LocationSelectorConfig,
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
     TextSelector,
     TextSelectorConfig,
     TextSelectorType,
 )
 
 from .api import OneCall4Client, OWMAuthError, OWMError, OWMRateLimitError
-from .const import DEFAULT_LANGUAGE, DEFAULT_NAME, DOMAIN, LANGUAGES
+from .const import (
+    CONF_RAIN_AMOUNT,
+    CONF_RAIN_PROBABILITY,
+    DEFAULT_LANGUAGE,
+    DEFAULT_NAME,
+    DEFAULT_RAIN_AMOUNT,
+    DEFAULT_RAIN_PROBABILITY,
+    DOMAIN,
+    LANGUAGES,
+)
 
 # Use whichever schema library this Home Assistant's flow manager uses:
 # probatio from 2026.11, voluptuous before that.
@@ -58,7 +70,29 @@ USER_SCHEMA = vol.Schema(
 )
 REAUTH_SCHEMA = vol.Schema({vol.Required(CONF_API_KEY): API_KEY_SELECTOR})
 OPTIONS_SCHEMA = vol.Schema(
-    {vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): LANGUAGE_SELECTOR}
+    {
+        vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): LANGUAGE_SELECTOR,
+        vol.Optional(
+            CONF_RAIN_PROBABILITY, default=DEFAULT_RAIN_PROBABILITY
+        ): NumberSelector(
+            NumberSelectorConfig(
+                min=5,
+                max=100,
+                step=5,
+                unit_of_measurement="%",
+                mode=NumberSelectorMode.SLIDER,
+            )
+        ),
+        vol.Optional(CONF_RAIN_AMOUNT, default=DEFAULT_RAIN_AMOUNT): NumberSelector(
+            NumberSelectorConfig(
+                min=0.1,
+                max=5,
+                step=0.1,
+                unit_of_measurement="mm",
+                mode=NumberSelectorMode.BOX,
+            )
+        ),
+    }
 )
 
 
@@ -111,7 +145,7 @@ class OWM4ConfigFlow(ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry: ConfigEntry) -> OWM4OptionsFlow:
-        """Options: language."""
+        """Options: language and rain thresholds."""
         return OWM4OptionsFlow()
 
     async def async_step_user(
@@ -187,7 +221,7 @@ class OWM4ConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class OWM4OptionsFlow(OptionsFlowWithReload):
-    """Change the language."""
+    """Change the language and what counts as a wet hour."""
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None

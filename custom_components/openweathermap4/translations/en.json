@@ -39,11 +39,16 @@
     "step": {
       "init": {
         "data": {
-          "language": "Language"
+          "language": "Language",
+          "rain_probability": "Chance of rain",
+          "rain_amount": "Rain in the hour"
         },
         "data_description": {
-          "language": "Language for the weather descriptions"
-        }
+          "language": "Language for the weather descriptions",
+          "rain_probability": "Hours with at least this chance of rain count as wet",
+          "rain_amount": "Hours with at least this much rain or snow forecast count as wet"
+        },
+        "description": "An hour of the hourly forecast counts as rain for **Next rain** and **Rain later today** when either its chance of rain or its amount reaches the value below. Within the next hour the minute-by-minute forecast decides."
       }
     }
   },
@@ -51,6 +56,9 @@
     "binary_sensor": {
       "precipitation_next_hour": {
         "name": "Precipitation next hour"
+      },
+      "rain_today": {
+        "name": "Rain later today"
       }
     },
     "sensor": {
@@ -101,6 +109,12 @@
       },
       "next_hour_precipitation": {
         "name": "Next hour precipitation"
+      },
+      "next_rain": {
+        "name": "Next rain"
+      },
+      "dry_hours_today": {
+        "name": "Dry hours left today"
       }
     }
   },

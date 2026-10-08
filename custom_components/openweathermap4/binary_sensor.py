@@ -1,4 +1,4 @@
-"""Binary sensor: is precipitation expected in the next hour?"""
+"""Binary sensors: precipitation in the next hour, and later today."""
 
 from __future__ import annotations
 
@@ -16,8 +16,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import OWM4ConfigEntry
 from .const import ATTRIBUTION
-from .coordinator import MinuteCoordinator
-from .entity import device_info
+from .coordinator import HourlyCoordinator, MinuteCoordinator
+from .entity import RainOutlookMixin, device_info
 
 
 async def async_setup_entry(
@@ -25,8 +25,11 @@ async def async_setup_entry(
     entry: OWM4ConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Add the binary sensor."""
-    async_add_entities([PrecipitationNextHour(entry, entry.runtime_data.minute)])
+    """Add the binary sensors."""
+    data = entry.runtime_data
+    async_add_entities(
+        [PrecipitationNextHour(entry, data.minute), RainToday(entry, data.hourly)]
+    )
 
 
 class PrecipitationNextHour(CoordinatorEntity[MinuteCoordinator], BinarySensorEntity):
@@ -70,4 +73,38 @@ class PrecipitationNextHour(CoordinatorEntity[MinuteCoordinator], BinarySensorEn
             "ends_at": s["ends_at"],
             "minutes_until": s["minutes_until"],
             "max_rate": s["max_rate"],
+        }
+
+
+class RainToday(
+    RainOutlookMixin, CoordinatorEntity[HourlyCoordinator], BinarySensorEntity
+):
+    """On when rain is expected between now and midnight."""
+
+    _attr_attribution = ATTRIBUTION
+    _attr_has_entity_name = True
+    _attr_translation_key = "rain_today"
+    _attr_device_class = BinarySensorDeviceClass.MOISTURE
+
+    def __init__(self, entry: OWM4ConfigEntry, coordinator: HourlyCoordinator) -> None:
+        """Initialise."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.unique_id}-rain_today"
+        self._attr_device_info = device_info(entry)
+
+    @property
+    def is_on(self) -> bool | None:
+        """True when the next rain starts before midnight."""
+        outlook = self.outlook()
+        return None if outlook is None else outlook["rain_today"]
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """When it starts and how long it stays dry before then."""
+        outlook = self.outlook()
+        if outlook is None:
+            return None
+        return {
+            "next_rain": outlook["next_rain"],
+            "dry_hours": outlook["dry_hours_today"],
         }

@@ -45,6 +45,13 @@ DAILY_DAYS = 8
 # minutes-until / binary sensors. Below it is drizzle noise.
 RAIN_THRESHOLD = 0.1
 
+# Options: an hour of the hourly forecast counts as wet for "next rain" when
+# either its chance of rain or its amount reaches these.
+CONF_RAIN_PROBABILITY = "rain_probability"
+CONF_RAIN_AMOUNT = "rain_amount"
+DEFAULT_RAIN_PROBABILITY = 40  # %
+DEFAULT_RAIN_AMOUNT = 0.2  # mm in the hour
+
 LANGUAGES = [
     "af", "al", "ar", "az", "bg", "ca", "cz", "da", "de", "el", "en", "es",
     "eu", "fa", "fi", "fr", "gl", "he", "hi", "hr", "hu", "id", "it", "ja",

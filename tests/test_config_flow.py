@@ -101,18 +101,23 @@ async def test_reauth_updates_key(
 async def test_options_flow(
     hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, config_entry
 ) -> None:
-    """Language can be changed afterwards."""
+    """Language and rain thresholds can be changed afterwards."""
     mock_api(aioclient_mock)
     config_entry.add_to_hass(hass)
     await hass.config_entries.async_setup(config_entry.entry_id)
     await hass.async_block_till_done()
     result = await hass.config_entries.options.async_init(config_entry.entry_id)
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"language": "de"}
+        result["flow_id"],
+        {"language": "de", "rain_probability": 60, "rain_amount": 0.5},
     )
     await hass.async_block_till_done()
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert config_entry.options == {"language": "de"}
+    assert config_entry.options == {
+        "language": "de",
+        "rain_probability": 60,
+        "rain_amount": 0.5,
+    }
 
 
 @pytest.mark.parametrize(

@@ -6,6 +6,12 @@
         "state": {
           "on": "mdi:weather-pouring"
         }
+      },
+      "rain_today": {
+        "default": "mdi:weather-partly-cloudy",
+        "state": {
+          "on": "mdi:weather-partly-rainy"
+        }
       }
     },
     "sensor": {
@@ -41,6 +47,12 @@
       },
       "next_hour_precipitation": {
         "default": "mdi:weather-rainy"
+      },
+      "next_rain": {
+        "default": "mdi:weather-rainy"
+      },
+      "dry_hours_today": {
+        "default": "mdi:tshirt-crew"
       }
     }
   },
